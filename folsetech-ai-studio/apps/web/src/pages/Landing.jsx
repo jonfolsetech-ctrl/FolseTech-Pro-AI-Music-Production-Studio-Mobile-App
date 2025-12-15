@@ -27,7 +27,7 @@ const Landing = () => {
           textShadow: '2px 2px 8px rgba(255, 107, 0, 0.6), -1px -1px 4px rgba(255, 133, 51, 0.5), 0 0 20px rgba(255, 107, 0, 0.3)',
           lineHeight: '1.2'
         }}>
-          FolseTech Pro AI music Production Studio
+          AI Pro Studio
         </h1>
         
         <p style={{
