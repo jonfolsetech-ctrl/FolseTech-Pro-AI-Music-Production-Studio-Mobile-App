@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Landing from './pages/Landing';
+import Dashboard from './pages/Dashboard';
+import Studio from './pages/Studio';
 import AudioAnalysis from './pages/AudioAnalysis';
 import SongGenerator from './pages/SpeechToText';
 import VoiceCloning from './pages/VoiceCloning';
 import StemSeparation from './pages/StemSeparation';
 import Mastering from './pages/Mastering';
-import Dashboard from './pages/Dashboard';
 
 // Firebase will be initialized when credentials are provided
 export const auth = null;
@@ -19,7 +21,9 @@ function App() {
         <nav className="navbar">
           <h1>FolseTech Pro AI Music Production Studio</h1>
           <ul>
-            <li><Link to="/">Dashboard</Link></li>
+            <li><Link to="/">Home</Link></li>
+            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/studio">Studio</Link></li>
             <li><Link to="/analysis">Audio Analysis</Link></li>
             <li><Link to="/speech">Song Generator</Link></li>
             <li><Link to="/voice-clone">Voice Cloning</Link></li>
@@ -29,7 +33,9 @@ function App() {
         </nav>
         <main className="container">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/studio" element={<Studio />} />
             <Route path="/analysis" element={<AudioAnalysis />} />
             <Route path="/speech" element={<SongGenerator />} />
             <Route path="/voice-clone" element={<VoiceCloning />} />
