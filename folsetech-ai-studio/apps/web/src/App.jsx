@@ -19,7 +19,7 @@ function App() {
     <BrowserRouter>
       <div className="app">
         <nav className="navbar">
-          <h1>FolseTech Pro AI Music Production Studio</h1>
+          <h1>AI Pro Studio</h1>
           <ul>
             <li><Link to="/">Home</Link></li>
             <li><Link to="/dashboard">Dashboard</Link></li>

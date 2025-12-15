@@ -18,7 +18,7 @@ const Landing = () => {
         textAlign: 'center'
       }}>
         <h1 style={{
-          fontSize: isMobile ? '2rem' : '4rem',
+          fontSize: isMobile ? '1.5rem' : '2.5rem',
           background: 'linear-gradient(135deg, #ff6b00 0%, #ff8533 50%, #ffaa66 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
@@ -27,7 +27,7 @@ const Landing = () => {
           textShadow: '2px 2px 8px rgba(255, 107, 0, 0.6), -1px -1px 4px rgba(255, 133, 51, 0.5), 0 0 20px rgba(255, 107, 0, 0.3)',
           lineHeight: '1.2'
         }}>
-          Folsetech Pro Ai Music Production Studio
+          AI Pro Studio
         </h1>
         
         <p style={{
@@ -103,42 +103,42 @@ const Landing = () => {
       }}>
         {[
           {
-            icon: '🎹',
+            icon: '✓',
             title: 'AI Melody Generator',
             description: 'Generate original melodies with AWS Bedrock AI. Describe what you want and let AI compose.'
           },
           {
-            icon: '🎚️',
+            icon: '✓',
             title: 'Professional Mastering',
             description: 'Industry-standard mastering profiles optimized for streaming, vinyl, and clubs.'
           },
           {
-            icon: '🎛️',
+            icon: '✓',
             title: 'Stem Mixer',
             description: 'Separate and mix vocals, drums, bass, and instruments independently.'
           },
           {
-            icon: '🎼',
+            icon: '✓',
             title: 'Piano Roll Editor',
             description: 'Full-featured MIDI editor for precise note editing and programming.'
           },
           {
-            icon: '📊',
+            icon: '✓',
             title: 'DAW Timeline',
             description: 'Professional timeline interface with clip editing, automation, and arrangement.'
           },
           {
-            icon: '🎤',
+            icon: '✓',
             title: 'Voice Cloning',
             description: 'Clone any voice and generate speech or singing with custom text.'
           },
           {
-            icon: '🎵',
+            icon: '✓',
             title: 'AI Song Generator',
             description: 'Generate complete songs with lyrics across 20+ genres.'
           },
           {
-            icon: '☁️',
+            icon: '✓',
             title: 'Cloud Processing',
             description: 'GPU-accelerated processing in the cloud for lightning-fast results.'
           }
@@ -154,7 +154,7 @@ const Landing = () => {
               transition: 'all 0.3s'
             }}
           >
-            <div style={{ fontSize: isMobile ? '2.5rem' : '3rem', marginBottom: '15px' }}>{feature.icon}</div>
+            <div style={{ fontSize: isMobile ? '2rem' : '2.5rem', marginBottom: '15px', color: '#ff6b00', fontWeight: 'bold' }}>{feature.icon}</div>
             <h3 style={{ color: '#ff6b00', marginBottom: '10px', fontSize: isMobile ? '1.1rem' : '1.3rem' }}>
               {feature.title}
             </h3>
@@ -205,7 +205,7 @@ const Landing = () => {
         color: '#666',
         fontSize: isMobile ? '0.85rem' : '1rem'
       }}>
-        <p>© 2025 FolseTech Pro AI Music Production Studio. All rights reserved.</p>
+        <p>© 2025 AI Pro Studio. All rights reserved.</p>
       </footer>
     </div>
   );
