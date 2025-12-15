@@ -3,9 +3,16 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const admin = require('firebase-admin');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Queue = require('bull');
 require('dotenv').config();
+
+// Import new API modules
+const stripeCheckout = require('./stripe/checkout');
+const stripeWebhook = require('./stripe/webhook');
+const bedrockMelody = require('./bedrock/melody');
+const bedrockCoproducer = require('./bedrock/coproducer');
+const bedrockMasteringAI = require('./bedrock/masteringAI');
+const { createMusicJob, getJobStatus, cancelJob } = require('./jobs/createMusicJob');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -252,45 +259,165 @@ app.get('/api/jobs/:jobId', async (req, res) => {
   }
 });
 
-// Stripe Payment Intent
-app.post('/api/create-payment-intent', async (req, res) => {
-  try {
-    const { amount, currency = 'usd' } = req.body;
-    
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      automatic_payment_methods: { enabled: true }
-    });
+// ============================================
+// STRIPE PAYMENT ROUTES
+// ============================================
 
-    res.json({ clientSecret: paymentIntent.client_secret });
+// Create Checkout Session
+app.post('/api/stripe/create-checkout-session', async (req, res) => {
+  try {
+    const { priceId, userId, email, successUrl, cancelUrl } = req.body;
+    const session = await stripeCheckout.createCheckoutSession({
+      priceId,
+      userId,
+      email,
+      successUrl,
+      cancelUrl
+    });
+    res.json(session);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Payment failed' });
+    console.error('Checkout error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create Payment Intent
+app.post('/api/stripe/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency, userId } = req.body;
+    const paymentIntent = await stripeCheckout.createPaymentIntent({ amount, currency, userId });
+    res.json(paymentIntent);
+  } catch (error) {
+    console.error('Payment intent error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Subscription
+app.get('/api/stripe/subscription/:subscriptionId', async (req, res) => {
+  try {
+    const subscription = await stripeCheckout.getSubscription(req.params.subscriptionId);
+    res.json(subscription);
+  } catch (error) {
+    console.error('Get subscription error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Cancel Subscription
+app.post('/api/stripe/subscription/:subscriptionId/cancel', async (req, res) => {
+  try {
+    const subscription = await stripeCheckout.cancelSubscription(req.params.subscriptionId);
+    res.json(subscription);
+  } catch (error) {
+    console.error('Cancel subscription error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 // Stripe Webhook
-app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   try {
-    const event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-
-    if (event.type === 'payment_intent.succeeded') {
-      const paymentIntent = event.data.object;
-      console.log('Payment succeeded:', paymentIntent.id);
-      // Handle successful payment
-    }
-
+    const sig = req.headers['stripe-signature'];
+    await stripeWebhook.handleWebhook(req.body, sig, db);
     res.json({ received: true });
   } catch (error) {
-    console.error(error);
+    console.error('Webhook error:', error);
     res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+});
+
+// ============================================
+// AWS BEDROCK AI ROUTES
+// ============================================
+
+// Generate AI Melody
+app.post('/api/bedrock/generate-melody', async (req, res) => {
+  try {
+    const { prompt, genre, mood, tempo, duration } = req.body;
+    const melody = await bedrockMelody.generateMelody({ prompt, genre, mood, tempo, duration });
+    res.json(melody);
+  } catch (error) {
+    console.error('Melody generation error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Producer Advice
+app.post('/api/bedrock/producer-advice', async (req, res) => {
+  try {
+    const { question, context } = req.body;
+    const advice = await bedrockCoproducer.getProducerAdvice(question, context);
+    res.json({ advice });
+  } catch (error) {
+    console.error('Producer advice error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Analyze Arrangement
+app.post('/api/bedrock/analyze-arrangement', async (req, res) => {
+  try {
+    const { sections, genre, tempo } = req.body;
+    const analysis = await bedrockCoproducer.analyzeArrangement(sections, genre, tempo);
+    res.json(analysis);
+  } catch (error) {
+    console.error('Arrangement analysis error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Mastering Recommendations
+app.post('/api/bedrock/mastering-recommendations', async (req, res) => {
+  try {
+    const { audioAnalysis, targetPlatform, genre } = req.body;
+    const recommendations = await bedrockMasteringAI.getMasteringRecommendations(
+      audioAnalysis,
+      targetPlatform,
+      genre
+    );
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Mastering recommendations error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// JOB QUEUE ROUTES
+// ============================================
+
+// Create Music Job
+app.post('/api/jobs/create', async (req, res) => {
+  try {
+    const { jobType, jobData } = req.body;
+    const job = await createMusicJob(jobType, jobData);
+    res.json(job);
+  } catch (error) {
+    console.error('Create job error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get Job Status
+app.get('/api/jobs/:jobId', async (req, res) => {
+  try {
+    const status = await getJobStatus(req.params.jobId);
+    res.json(status);
+  } catch (error) {
+    console.error('Get job status error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Cancel Job
+app.post('/api/jobs/:jobId/cancel', async (req, res) => {
+  try {
+    const result = await cancelJob(req.params.jobId);
+    res.json(result);
+  } catch (error) {
+    console.error('Cancel job error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
