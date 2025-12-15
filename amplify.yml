@@ -1,36 +1,17 @@
 version: 1
-applications:
-  - frontend:
-      phases:
-        preBuild:
-          commands:
-            - cd folsetech-ai-studio/apps/web
-            - npm ci
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: folsetech-ai-studio/apps/web/dist
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - folsetech-ai-studio/apps/web/node_modules/**/*
-    appRoot: folsetech-ai-studio/apps/web
-  - backend:
-      phases:
-        preBuild:
-          commands:
-            - cd folsetech-ai-studio/apps/api
-            - npm ci
-        build:
-          commands:
-            - echo "Backend built successfully"
-      artifacts:
-        baseDirectory: folsetech-ai-studio/apps/api
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - folsetech-ai-studio/apps/api/node_modules/**/*
-    appRoot: folsetech-ai-studio/apps/api
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd folsetech-ai-studio/apps/web
+        - npm ci --legacy-peer-deps
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: folsetech-ai-studio/apps/web/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - folsetech-ai-studio/apps/web/node_modules/**/*
