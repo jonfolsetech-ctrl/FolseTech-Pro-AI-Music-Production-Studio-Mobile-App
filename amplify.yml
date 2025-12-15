@@ -3,17 +3,16 @@ frontend:
   phases:
     preBuild:
       commands:
-        - node --version
-        - npm --version
         - cd folsetech-ai-studio/apps/web
         - npm install --legacy-peer-deps
     build:
       commands:
         - npm run build
+        - ls -la dist
   artifacts:
-    baseDirectory: dist
+    baseDirectory: folsetech-ai-studio/apps/web/dist
     files:
       - '**/*'
   cache:
     paths:
-      - node_modules/**/*
+      - folsetech-ai-studio/apps/web/node_modules/**/*
