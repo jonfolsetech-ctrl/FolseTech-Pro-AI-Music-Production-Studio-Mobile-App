@@ -36,6 +36,35 @@ body {
   flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .navbar h1 {
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .navbar ul {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .navbar li {
+    width: 100%;
+  }
+
+  .navbar a {
+    display: block;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
+
 .navbar a {
   color: #fff;
   text-decoration: none;
