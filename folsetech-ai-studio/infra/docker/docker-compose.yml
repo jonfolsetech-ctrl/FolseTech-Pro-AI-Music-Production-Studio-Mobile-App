@@ -1,0 +1,73 @@
+services:
+  web:
+    build:
+      context: ../../apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_FIREBASE_API_KEY=${FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${FIREBASE_APP_ID}
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - REDIS_URL=redis://redis:6379
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - AI_SERVICE_URL=http://ai-service:8000
+    depends_on:
+      - redis
+      - ai-service
+
+  ai-service:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.gpu
+    runtime: nvidia
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../ai:/app/ai
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  worker:
+    build:
+      context: ../../apps/api
+      dockerfile: Dockerfile
+    command: node workers.js
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - AI_SERVICE_URL=http://ai-service:8000
+    depends_on:
+      - redis
+      - ai-service
+
+volumes:
+  redis-data:
